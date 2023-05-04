@@ -1,5 +1,6 @@
+import React,{useState} from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, SafeAreaView, TouchableOpacity, Keyboard } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import {Switch,Surface,List,TextInput,useTheme,Avatar} from 'react-native-paper';
 import { Feather } from '@expo/vector-icons';
@@ -7,6 +8,21 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { AutocompleteDropdown } from 'react-native-autocomplete-dropdown';
 export default function App() {
   const { colors } = useTheme();
+  const [isKeyboardVisible, setKeyboardVisible] = useState(false);
+  //const [isRemarksFocused, setRemarksFocused] = useState(false);
+  const keyboardDidShowListener = Keyboard.addListener(
+    'keyboardDidShow',
+    () => {
+      setKeyboardVisible(true); // or some other action
+     
+    }
+  );
+  const keyboardDidHideListener = Keyboard.addListener(
+    'keyboardDidHide',
+    () => {
+      setKeyboardVisible(false); // or some other action
+    }
+  );
   const renderCamara_FileUpload=()=> {
     return (
       <> 
@@ -144,13 +160,13 @@ return (
   return (
      <SafeAreaView style={styles.safeContainerStyle}>  
      
-     <ScrollView style={styles.scrollViewStyle} keyboardShouldPersistTaps={'always'}>  
+     <ScrollView 
+     ref={ref => {this.scrollView = ref}}
+     style={styles.scrollViewStyle} keyboardShouldPersistTaps={'always'}>  
     
      <View style={[Platform.select({ ios: { zIndex: 2 } })]}>
-          <AutocompleteDropdown 
-                    ref={searchCheckerRef}   
+          <AutocompleteDropdown   
                     clearOnFocus={false}          
-                    controller={(controller) => {checkerDllRef.current = controller}} 
                     direction={Platform.select({ ios: 'down' })} 
                     onSelectItem={(item) => {            
                       if(item!=null){             
@@ -162,14 +178,8 @@ return (
                         }
                       }          
                     }}
-                    onChangeText={getCheckerSuggestions}
-                    suggestionsListMaxHeight={Dimensions.get('window').height * 0.4}
-          onClear={onCheckerClearPress}
-          //  onSubmit={(e) => onSubmitSearch(e.nativeEvent.text)}
-          onOpenSuggestionsList={onOpenCheckerSuggestionsList}
-          loading={loadingChecker}
-          useFilter={false} // set false to prevent rerender twice
-            dataSet={checkerSuggestionsList}
+                    
+          useFilter={false} 
             textInputProps={{
               placeholder:"Type Checker Employee Code",
                 autoCorrect: false,
@@ -195,7 +205,6 @@ return (
               size={18} color={colors.text} onPress={() =>{
               updateState("checkerID",0)
               updateState("setcheckerUrl", defaultImageUrl)
-              checkerDllRef.current.clear();                
               }}
               />
             }
@@ -212,6 +221,12 @@ return (
      <View style={[Platform.select({ ios: { zIndex: 0 } })]}>
         <TextInput
                    label="Claim Remarks"
+                   onFocus={() =>{ 
+                  //  if(!isKeyboardVisible)
+                  //   {
+                      this.scrollView.scrollToEnd({animated: true});
+                   // }
+                  } }
                    multiline={true}
                    //number0OfLines={3}
                    maxLength={500}
